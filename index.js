@@ -8,9 +8,12 @@ app.get('/', function (req, res) {
     res.sendFile(__dirname + '/public/index.html');
 })
 
+var count = 0;
 //Handle connectiuon
 io.on('connection', function (socket) {
-    console.log('a user connected', socket.id);
+    count++;
+    console.log(count + ' user(s) connected', socket.id);
+    socket.broadcast.emit('new_user');
 
     //Handle Chat event
     socket.on('chat', function (data) {
@@ -24,6 +27,13 @@ io.on('connection', function (socket) {
 
     socket.on('not_typing', function(data){
         socket.broadcast.emit('not_typing', data);
+    })
+
+    //Handles disconnection
+    socket.on('disconnect', function(data){
+        count -= 1;
+        console.log('User disconnected');
+        io.emit('disconnect', data)
     })
 })
 
